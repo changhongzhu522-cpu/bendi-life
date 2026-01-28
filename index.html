@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地生活通 - 综合服务平台</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基础设置 */
+        body { 
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; 
+            background-color: #f3f4f6; 
+            color: #333;
+        }
+        
+        /* 页面切换逻辑 */
+        .page { 
+            display: none; 
+            padding-bottom: 80px; /* 为底部导航留出空间 */
+            animation: fadeIn 0.3s ease;
+        }
+        .page.active { 
+            display: block; 
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 自定义底部导航定位，确保在宽屏下也居中 */
+        .bottom-nav-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 28rem; /* 对应 max-w-md */
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- 手机模拟容器 -->
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen relative shadow-2xl overflow-hidden">
+        
+        <!-- 顶部通栏 (根据页面动态变化，这里默认显示通用头) -->
+        <header id="main-header" class="bg-blue-600 text-white p-4 sticky top-0 z-40 shadow-md flex justify-between items-center transition-colors duration-300">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="alert('定位切换功能演示')">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="location-text" class="text-sm font-bold truncate max-w-[100px]">北京市 · 朝阳区</span>
+                <i class="fas fa-chevron-down text-xs opacity-75"></i>
+            </div>
+            <div class="flex-1 mx-3">
+                <div class="bg-blue-500/50 rounded-full px-3 py-1.5 flex items-center border border-blue-400/30">
+                    <i class="fas fa-search text-blue-100 text-xs"></i>
+                    <input type="text" placeholder="找商家、找服务..." class="bg-transparent border-none outline-none text-sm text-white placeholder-blue-200 w-full ml-2">
+                </div>
+            </div>
+            <div class="relative cursor-pointer" onclick="navTo('mall-page')">
+                <i class="fas fa-bell text-lg"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+            </div>
+        </header>
+
+        <!-- 1. 首页 (HOME) -->
+        <div id="home-page" class="page active">
+            <!-- Banner -->
+            <div class="relative bg-gradient-to-br from-blue-600 to-indigo-700 h-40 rounded-b-[30px] px-6 pt-2 pb-12 text-white overflow-hidden">
+                <div class="absolute right-0 bottom-0 opacity-20 text-9xl transform translate-x-10 translate-y-10">
+                    <i class="fas fa-city"></i>
+                </div>
+                <h1 class="text-2xl font-bold mb-1">本地生活通</h1>
+                <p class="text-sm opacity-80">连接你我，服务社区</p>
+                <div class="mt-4 flex gap-4 text-xs font-medium">
+                    <span class="bg-white/20 px-2 py-1 rounded"><i class="fas fa-check-circle mr-1"></i>实名认证</span>
+                    <span class="bg-white/20 px-2 py-1 rounded"><i class="fas fa-shield-alt mr-1"></i>平台担保</span>
+                </div>
+            </div>
+
+            <!-- 功能金刚区 -->
+            <div class="mx-4 -mt-10 bg-white rounded-xl shadow-lg p-4 grid grid-cols-3 gap-y-6 relative z-10">
+                <div onclick="navTo('merchant-page')" class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">附近商家</span>
+                </div>
+                <div onclick="navTo('dating-page')" class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">单身交友</span>
+                </div>
+                <div onclick="navTo('demand-page')" class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <div class="w-12 h-12 rounded-full bg-green-100 text-green-500 flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">需求发布</span>
+                </div>
+                <div onclick="navTo('ai-page')" class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">智能客服</span>
+                </div>
+                <div onclick="navTo('mall-page')" class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">兑换商城</span>
+                </div>
+                <div onclick="showAbout()" class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xl shadow-sm">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">关于平台</span>
+                </div>
+            </div>
+
+            <!-- 热门推荐 -->
+            <div class="p-4 mt-2">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-bold text-lg text-gray-800 border-l-4 border-blue-500 pl-2">热门商家</h2>
+                    <span onclick="navTo('merchant-page')" class="text-xs text-gray-500 cursor-pointer">更多 <i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div id="home-merchant-list" class="space-y-3">
+                    <!-- JS 生成内容 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 商家列表页 (MERCHANTS) -->
+        <div id="merchant-page" class="page bg-gray-50 min-h-screen">
+            <!-- 筛选栏 -->
+            <div class="bg-white p-2 sticky top-14 z-30 shadow-sm flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <button class="px-4 py-1.5 bg-blue-600 text-white rounded-full text-xs font-medium whitespace-nowrap shadow-sm">全部</button>
+                <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs font-medium whitespace-nowrap">美食餐饮</button>
+                <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs font-medium whitespace-nowrap">休闲娱乐</button>
+                <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs font-medium whitespace-nowrap">家政服务</button>
+                <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs font-medium whitespace-nowrap">丽人美发</button>
+            </div>
+            
+            <div class="p-2 py-3 flex justify-between text-xs text-gray-500 bg-white border-b px-4">
+                <span class="cursor-pointer font-bold text-blue-600">综合排序 <i class="fas fa-caret-down"></i></span>
+                <span class="cursor-pointer">距离最近</span>
+                <span class="cursor-pointer">评分最高</span>
+                <span class="cursor-pointer">人均低到高</span>
+            </div>
+
+            <div id="merchant-list-container" class="p-4 space-y-3">
+                <!-- JS 生成内容 -->
+            </div>
+        </div>
+
+        <!-- 3. 交友页 (DATING) - 合规版 -->
+        <div id="dating-page" class="page">
+            <!-- 反诈提醒 -->
+            <div class="bg-pink-50 border-b border-pink-100 p-3 text-xs text-pink-700 flex items-start gap-2">
+                <i class="fas fa-shield-alt mt-0.5"></i>
+                <div>
+                    <span class="font-bold">反诈提醒：</span>平台严禁任何形式的资金往来。遇到要求汇款、投资理财的请立即举报。
+                </div>
+            </div>
+
+            <div class="bg-white sticky top-14 z-30 shadow-sm">
+                <div class="flex">
+                    <button class="flex-1 py-3 text-center text-sm font-bold border-b-2 border-pink-500 text-pink-600" onclick="switchTab('dating', 'list')">缘分广场</button>
+                    <button class="flex-1 py-3 text-center text-sm text-gray-500" onclick="switchTab('dating', 'post')">发布资料</button>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <!-- 列表视图 -->
+                <div id="dating-list-view" class="grid grid-cols-2 gap-3">
+                    <!-- JS 生成 -->
+                </div>
+
+                <!-- 发布表单 -->
+                <div id="dating-post-view" class="hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4 text-center">完善个人资料</h3>
+                        <form onsubmit="handleDatingSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">昵称 (脱敏显示)</label>
+                                <input type="text" required class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-pink-500 outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">年龄</label>
+                                    <input type="number" required class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-pink-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 block mb-1">职业</label>
+                                    <input type="text" required class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-pink-500 outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1">自我介绍</label>
+                                <textarea rows="3" class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-pink-500 outline-none"></textarea>
+                            </div>
+                            <div class="border-t pt-4">
+                                <label class="flex items-center gap-2 text-xs text-gray-600">
+                                    <input type="checkbox" required> 我已阅读并同意《用户隐私协议》及《交友反诈公约》
+                                </label>
+                            </div>
+                            <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white py-2.5 rounded-lg font-bold shadow-lg shadow-pink-200 transition">提交审核</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 需求页 (DEMAND) -->
+        <div id="demand-page" class="page">
+            <div class="bg-white sticky top-14 z-30 shadow-sm">
+                <div class="flex">
+                    <button class="flex-1 py-3 text-center text-sm font-bold border-b-2 border-green-500 text-green-600" onclick="switchTab('demand', 'list')">需求大厅</button>
+                    <button class="flex-1 py-3 text-center text-sm text-gray-500" onclick="switchTab('demand', 'post')">快速发布</button>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <!-- 统计条 -->
+                <div id="demand-stats" class="bg-green-50 rounded-lg p-3 mb-4 flex justify-between items-center text-green-800 text-xs">
+                    <span><i class="fas fa-chart-line"></i> 今日新增需求: <strong>128</strong></span>
+                    <span>撮合成功率: <strong>92%</strong></span>
+                </div>
+
+                <!-- 需求列表 -->
+                <div id="demand-list-view" class="space-y-3">
+                    <!-- JS 生成 -->
+                </div>
+
+                <!-- 发布表单 -->
+                <div id="demand-post-view" class="hidden">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <form onsubmit="handleDemandSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold">需求类别</label>
+                                <div class="flex gap-2 mt-2">
+                                    <label class="cursor-pointer"><input type="radio" name="d-cat" class="peer hidden" checked><span class="px-3 py-1 bg-gray-100 rounded text-xs peer-checked:bg-green-500 peer-checked:text-white">家政</span></label>
+                                    <label class="cursor-pointer"><input type="radio" name="d-cat" class="peer hidden"><span class="px-3 py-1 bg-gray-100 rounded text-xs peer-checked:bg-green-500 peer-checked:text-white">二手</span></label>
+                                    <label class="cursor-pointer"><input type="radio" name="d-cat" class="peer hidden"><span class="px-3 py-1 bg-gray-100 rounded text-xs peer-checked:bg-green-500 peer-checked:text-white">维修</span></label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold block mb-1">标题</label>
+                                <input type="text" placeholder="一句话描述需求" required class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-green-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold block mb-1">预算 (元)</label>
+                                <input type="number" placeholder="0为面议" class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-green-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold block mb-1">详情描述</label>
+                                <textarea rows="4" placeholder="请详细描述您的需求..." class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm focus:border-green-500 outline-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg font-bold shadow-lg shadow-green-200 transition">立即发布</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 个人中心/会员 (MEMBER) -->
+        <div id="member-page" class="page">
+            <div class="bg-gray-800 text-white pt-8 pb-16 px-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500 rounded-full filter blur-3xl opacity-20"></div>
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="w-16 h-16 rounded-full bg-gray-600 border-2 border-yellow-500 flex items-center justify-center text-3xl text-gray-300">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">游客用户</h2>
+                        <div class="flex items-center gap-2 text-xs text-yellow-500 mt-1 cursor-pointer" onclick="alert('请选择下方套餐开通')">
+                            <span class="border border-yellow-500 rounded px-1">未开通</span>
+                            <span>点击升级会员 <i class="fas fa-chevron-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-4 -mt-10 relative z-20">
+                <!-- 会员卡片 -->
+                <div class="bg-white rounded-xl shadow-lg p-5 mb-5">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-dashed">
+                        <h3 class="font-bold text-gray-800">会员权益中心</h3>
+                        <span class="text-xs text-gray-400">公开透明 · 无隐形消费</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- 普通会员 -->
+                        <div class="border border-gray-200 rounded-xl p-4 text-center hover:border-blue-500 cursor-pointer transition relative group">
+                            <h4 class="font-bold text-gray-700">基础会员</h4>
+                            <div class="text-2xl font-bold text-blue-600 my-2">¥100<span class="text-xs text-gray-400 font-normal">/年</span></div>
+                            <ul class="text-left text-xs text-gray-500 space-y-1.5 mb-4 pl-1">
+                                <li><i class="fas fa-check-circle text-blue-500"></i> 电子名片制作</li>
+                                <li><i class="fas fa-check-circle text-blue-500"></i> 商铺基础曝光</li>
+                                <li><i class="fas fa-check-circle text-blue-500"></i> 查看所有需求</li>
+                            </ul>
+                            <button onclick="upgradeMember('basic')" class="w-full py-1.5 rounded bg-blue-50 text-blue-600 text-xs font-bold group-hover:bg-blue-600 group-hover:text-white transition">开通</button>
+                        </div>
+
+                        <!-- VIP会员 -->
+                        <div class="border border-yellow-200 bg-gradient-to-b from-yellow-50 to-white rounded-xl p-4 text-center cursor-pointer relative shadow-sm transition transform hover:-translate-y-1">
+                            <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg rounded-tr-lg">推荐</div>
+                            <h4 class="font-bold text-gray-800"><i class="fas fa-crown text-yellow-500"></i> VIP会员</h4>
+                            <div class="text-2xl font-bold text-yellow-600 my-2">¥300<span class="text-xs text-gray-400 font-normal">/年</span></div>
+                            <ul class="text-left text-xs text-gray-600 space-y-1.5 mb-4 pl-1">
+                                <li><i class="fas fa-check-circle text-yellow-500"></i> 包含所有基础权益</li>
+                                <li><i class="fas fa-check-circle text-yellow-500"></i> 首页置顶推荐</li>
+                                <li><i class="fas fa-check-circle text-yellow-500"></i> 专属客服通道</li>
+                            </ul>
+                            <button onclick="upgradeMember('vip')" class="w-full py-1.5 rounded bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs font-bold shadow-md">立即开通</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 常用功能 -->
+                <div class="bg-white rounded-xl shadow-sm p-2 mb-20">
+                    <div onclick="navTo('mall-page')" class="flex items-center justify-between p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50">
+                        <span class="flex items-center gap-3 text-sm text-gray-700"><i class="fas fa-coins text-yellow-500 w-5 text-center"></i> 我的积分</span>
+                        <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                    </div>
+                    <div class="flex items-center justify-between p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50">
+                        <span class="flex items-center gap-3 text-sm text-gray-700"><i class="fas fa-file-contract text-blue-500 w-5 text-center"></i> 服务条款</span>
+                        <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                    </div>
+                    <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50">
+                        <span class="flex items-center gap-3 text-sm text-gray-700"><i class="fas fa-user-shield text-green-500 w-5 text-center"></i> 隐私政策</span>
+                        <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. AI客服页 (AI SERVICE) -->
+        <div id="ai-page" class="page bg-gray-100 h-screen flex flex-col">
+            <div class="p-2 bg-white text-center text-xs text-gray-500 shadow-sm sticky top-14 z-20">
+                <i class="fas fa-robot text-blue-500"></i> 24小时智能助手为您服务
+            </div>
+            
+            <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+                <div class="flex gap-2 items-start">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-robot"></i></div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm max-w-[85%] text-gray-700">
+                        您好！我是本地生活通的智能客服。
+                        <br>请问有什么可以帮您？
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button onclick="sendMsg('如何开通会员？')" class="px-2 py-1 bg-gray-100 hover:bg-blue-50 text-blue-600 rounded-lg text-xs border border-transparent hover:border-blue-200 transition">如何开通会员？</button>
+                            <button onclick="sendMsg('如何发布需求？')" class="px-2 py-1 bg-gray-100 hover:bg-blue-50 text-blue-600 rounded-lg text-xs border border-transparent hover:border-blue-200 transition">如何发布需求？</button>
+                            <button onclick="sendMsg('转接人工客服')" class="px-2 py-1 bg-gray-100 hover:bg-blue-50 text-blue-600 rounded-lg text-xs border border-transparent hover:border-blue-200 transition">转接人工</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 动态消息插入处 -->
+            </div>
+
+            <div class="fixed bottom-20 left-1/2 transform -translate-x-1/2 w-full max-w-md p-3 bg-white border-t flex gap-2 z-30">
+                <input type="text" id="chat-input" class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="请输入您的问题...">
+                <button onclick="handleChatSend()" class="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-md"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- 7. 积分商城 (MALL) -->
+        <div id="mall-page" class="page">
+            <div class="bg-purple-700 text-white p-6 rounded-b-[30px] shadow-lg mb-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs opacity-70 mb-1">当前可用积分</p>
+                        <p class="text-3xl font-bold">1,280</p>
+                    </div>
+                    <button class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-xs transition">积分记录</button>
+                </div>
+            </div>
+            
+            <div class="px-4 pb-4">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-gift text-purple-500"></i> 热门兑换</h3>
+                <div class="grid grid-cols-2 gap-4" id="mall-list">
+                    <!-- JS 生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 弹窗：商家详情 (Overlay) -->
+        <div id="merchant-detail-overlay" class="fixed inset-0 bg-white z-[60] hidden overflow-y-auto animate-[fadeIn_0.2s_ease-out]">
+            <div class="relative">
+                <img src="" id="detail-img" class="w-full h-64 object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                <button onclick="closeMerchantDetail()" class="absolute top-4 left-4 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition"><i class="fas fa-arrow-left"></i></button>
+                <button onclick="alert('分享菜单已打开')" class="absolute top-4 right-4 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition"><i class="fas fa-share-alt"></i></button>
+            </div>
+            
+            <div class="px-5 py-6 -mt-10 bg-white rounded-t-[30px] relative">
+                <h1 id="detail-name" class="text-2xl font-bold text-gray-900 mb-1">商家名称</h1>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="flex items-center text-orange-400 text-sm">
+                        <i class="fas fa-star"></i><span id="detail-score" class="ml-1 font-bold text-orange-500">4.8</span>
+                    </div>
+                    <span class="w-px h-3 bg-gray-300"></span>
+                    <span id="detail-cat" class="text-gray-500 text-sm">类别</span>
+                    <span class="w-px h-3 bg-gray-300"></span>
+                    <span class="text-green-600 text-sm font-medium">营业中</span>
+                </div>
+                
+                <div class="flex gap-4 mb-8">
+                    <button onclick="alert('正在呼叫商家...')" class="flex-1 bg-blue-50 text-blue-600 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-100 transition"><i class="fas fa-phone-alt"></i> 电话联系</button>
+                    <button onclick="alert('正在启动地图导航...')" class="flex-1 bg-blue-50 text-blue-600 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-100 transition"><i class="fas fa-location-arrow"></i> 导航前往</button>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2 text-lg">商家介绍</h3>
+                        <p id="detail-desc" class="text-gray-600 text-sm leading-relaxed text-justify">介绍内容...</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2 text-lg">地址信息</h3>
+                        <p id="detail-addr" class="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg flex items-start gap-2">
+                            <i class="fas fa-map-pin text-gray-400 mt-1"></i> <span>地址内容</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-8 pb-4">
+                     <button class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3.5 rounded-full font-bold shadow-lg shadow-blue-200 active:scale-95 transition transform">立即预约服务</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 弹窗：关于我们 -->
+        <div id="about-overlay" class="fixed inset-0 bg-black/60 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl max-w-xs w-full p-6 text-center shadow-2xl relative animate-[fadeIn_0.2s_ease-out]">
+                <button onclick="closeAbout()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl mb-4 shadow-lg shadow-blue-200">
+                    <i class="fas fa-city"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">本地生活通</h2>
+                <p class="text-xs text-gray-400 mb-4">版本 v1.0.0</p>
+                <div class="text-sm text-gray-600 space-y-2 mb-6 text-left bg-gray-50 p-3 rounded-lg">
+                    <p>致力于打造真实、便捷的本地服务平台。</p>
+                    <p class="pt-2 border-t border-gray-200 mt-2"><span class="font-bold">客服热线：</span>400-888-9999</p>
+                    <p><span class="font-bold">服务时间：</span>9:00 - 21:00</p>
+                </div>
+                <button onclick="closeAbout()" class="w-full bg-gray-800 text-white py-2 rounded-lg font-medium hover:bg-gray-700 transition">关闭</button>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav-fixed bg-white border-t border-gray-100 flex justify-around py-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+            <div onclick="navTo('home-page')" class="nav-item flex flex-col items-center cursor-pointer w-full group" data-target="home-page">
+                <i class="fas fa-home text-xl mb-1 text-blue-600 transition-colors group-active:scale-90"></i>
+                <span class="text-[10px] text-blue-600 font-medium">首页</span>
+            </div>
+            <div onclick="navTo('merchant-page')" class="nav-item flex flex-col items-center cursor-pointer w-full group text-gray-400" data-target="merchant-page">
+                <i class="fas fa-store text-xl mb-1 transition-colors group-active:scale-90"></i>
+                <span class="text-[10px] font-medium">商家</span>
+            </div>
+            <div onclick="navTo('dating-page')" class="nav-item flex flex-col items-center cursor-pointer w-full group text-gray-400" data-target="dating-page">
+                <i class="fas fa-heart text-xl mb-1 transition-colors group-active:scale-90"></i>
+                <span class="text-[10px] font-medium">交友</span>
+            </div>
+            <div onclick="navTo('demand-page')" class="nav-item flex flex-col items-center cursor-pointer w-full group text-gray-400" data-target="demand-page">
+                <i class="fas fa-clipboard-list text-xl mb-1 transition-colors group-active:scale-90"></i>
+                <span class="text-[10px] font-medium">需求</span>
+            </div>
+             <div onclick="navTo('member-page')" class="nav-item flex flex-col items-center cursor-pointer w-full group text-gray-400" data-target="member-page">
+                <i class="fas fa-user text-xl mb-1 transition-colors group-active:scale-90"></i>
+                <span class="text-[10px] font-medium">我的</span>
+            </div>
+        </nav>
+
+    </div>
+
+    <!-- 逻辑脚本 -->
+    <script>
+        // --- 模拟数据 ---
+        const merchants = [
+            { id: 1, name: "时光印记咖啡馆", category: "美食/咖啡", score: 4.9, dist: "300m", img: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&q=80", desc: "复古工业风设计，精选阿拉比卡豆，是您工作休闲的绝佳去处。", addr: "朝阳区建国路88号SOHO现代城A座" },
+            { id: 2, name: "洁净家政服务中心", category: "家政服务", score: 4.8, dist: "1.2km", img: "https://images.unsplash.com/photo-1581578731117-104f2a41272c?w=500&q=80", desc: "十年品牌，专业保洁、家电清洗、收纳整理，员工实名认证。", addr: "海淀区中关村大街15号" },
+            { id: 3, name: "极速健身工作室", category: "休闲娱乐", score: 4.7, dist: "800m", img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500&q=80", desc: "24小时自助健身，进口器械，更有专业私教一对一指导。", addr: "朝阳区三里屯太古里西区" },
+            { id: 4, name: "爱尚造型护肤", category: "丽人/美发", score: 4.6, dist: "500m", img: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500&q=80", desc: "资深总监操刀，使用一线品牌洗护产品，打造属于您的独特美。", addr: "东城区东直门外大街" },
+            { id: 5, name: "萌宠乐园宠物医院", category: "生活服务", score: 4.9, dist: "2.5km", img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&q=80", desc: "专业兽医团队，先进医疗设备，24小时急诊服务。", addr: "丰台区西四环南路" }
+        ];
+
+        const datingProfiles = [
+            { id: 1, name: "李**", age: 28, job: "互联网/程序员", img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80", intro: "工作稳定，热爱户外徒步和摄影，期待遇到热爱生活的你。" },
+            { id: 2, name: "王**", age: 26, job: "教育/教师", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80", intro: "性格开朗，平时喜欢看书和烘焙，希望能找到灵魂伴侣。" },
+            { id: 3, name: "张**", age: 30, job: "金融/分析师", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&q=80", intro: "事业上升期，成熟稳重，寻找可以一起成长的另一半。" },
+            { id: 4, name: "刘**", age: 27, job: "设计/UI", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80", intro: "周末喜欢逛展，是个猫奴，希望能遇到善良的你。" }
+        ];
+
+        const demands = [
+            { id: 1, title: "急需家庭日常保洁3小时", budget: "150元", time: "10分钟前", tag: "家政", color: "blue" },
+            { id: 2, title: "求购二手iPhone 13一台", budget: "3000元", time: "1小时前", tag: "二手", color: "orange" },
+            { id: 3, title: "办公室绿植租赁与养护", budget: "面议", time: "3小时前", tag: "采购", color: "green" },
+            { id: 4, title: "卫生间水管漏水维修", budget: "200元", time: "5小时前", tag: "维修", color: "red" }
+        ];
+
+        const mallItems = [
+            { id: 1, name: "星巴克中杯券", points: 500, img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&q=80" },
+            { id: 2, name: "IMAX电影兑换码", points: 800, img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&q=80" },
+            { id: 3, name: "50元超市购物卡", points: 5000, img: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=300&q=80" },
+            { id: 4, name: "定制环保帆布袋", points: 1200, img: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=300&q=80" }
+        ];
+
+        // --- 核心功能函数 ---
+
+        // 页面导航
+        function navTo(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            // 显示目标页面
+            document.getElementById(pageId).classList.add('active');
+            
+            // 更新底部导航状态
+            document.querySelectorAll('.nav-item').forEach(el => {
+                const icon = el.querySelector('i');
+                const text = el.querySelector('span');
+                if(el.dataset.target === pageId) {
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-blue-600');
+                    text.classList.remove('text-gray-400');
+                    text.classList.add('text-blue-600');
+                } else {
+                    icon.classList.add('text-gray-400');
+                    icon.classList.remove('text-blue-600');
+                    text.classList.add('text-gray-400');
+                    text.classList.remove('text-blue-600');
+                }
+            });
+
+            // 回到顶部
+            window.scrollTo(0, 0);
+        }
+
+        // 标签切换 (用于交友和需求页)
+        function switchTab(section, tab) {
+            if(section === 'dating') {
+                if(tab === 'list') {
+                    document.getElementById('dating-list-view').classList.remove('hidden');
+                    document.getElementById('dating-post-view').classList.add('hidden');
+                } else {
+                    document.getElementById('dating-list-view').classList.add('hidden');
+                    document.getElementById('dating-post-view').classList.remove('hidden');
+                }
+            } else if (section === 'demand') {
+                if(tab === 'list') {
+                    document.getElementById('demand-list-view').classList.remove('hidden');
+                    document.getElementById('demand-stats').classList.remove('hidden');
+                    document.getElementById('demand-post-view').classList.add('hidden');
+                } else {
+                    document.getElementById('demand-list-view').classList.add('hidden');
+                    document.getElementById('demand-stats').classList.add('hidden');
+                    document.getElementById('demand-post-view').classList.remove('hidden');
+                }
+            }
+        }
+
+        // 渲染商家
+        function renderMerchants() {
+            const list = document.getElementById('home-merchant-list');
+            const mainList = document.getElementById('merchant-list-container');
+            
+            // 首页只显示前3个
+            let htmlHome = '';
+            merchants.slice(0, 3).forEach(m => {
+                htmlHome += createMerchantCard(m);
+            });
+            list.innerHTML = htmlHome;
+
+            // 列表页显示所有
+            let htmlMain = '';
+            merchants.forEach(m => {
+                htmlMain += createMerchantCard(m);
+            });
+            mainList.innerHTML = htmlMain;
+        }
+
+        function createMerchantCard(m) {
+            return `
+            <div onclick="openMerchantDetail(${m.id})" class="flex gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition">
+                <img src="${m.img}" class="w-24 h-24 object-cover rounded-lg bg-gray-200">
+                <div class="flex-1 flex flex-col justify-between py-1">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm mb-1">${m.name}</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-orange-500 font-bold text-xs flex items-center"><i class="fas fa-star text-[10px] mr-0.5"></i>${m.score}</span>
+                            <span class="text-gray-400 text-xs bg-gray-100 px-1.5 py-0.5 rounded">${m.category}</span>
+                        </div>
+                    </div>
+                    <div>
+                         <p class="text-xs text-gray-400 line-clamp-1 mb-2">${m.desc}</p>
+                         <div class="flex justify-between items-end border-t border-dashed border-gray-100 pt-2">
+                            <span class="text-gray-400 text-xs truncate max-w-[120px]">${m.addr}</span>
+                            <span class="text-blue-500 text-xs font-medium"><i class="fas fa-location-arrow"></i> ${m.dist}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // 渲染交友列表
+        function renderDating() {
+            const container = document.getElementById('dating-list-view');
+            let html = '';
+            datingProfiles.forEach(p => {
+                html += `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden group">
+                    <div class="h-36 bg-gray-200 relative overflow-hidden">
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 pt-6">
+                            <div class="text-white font-bold text-sm">${p.name} <span class="text-xs font-normal opacity-80">${p.age}岁</span></div>
+                        </div>
+                    </div>
+                    <div class="p-2.5">
+                        <div class="text-xs font-bold text-blue-600 mb-1">${p.job}</div>
+                        <p class="text-xs text-gray-500 line-clamp-2 mb-2 h-8">${p.intro}</p>
+                        <button onclick="alert('请先完成实名认证并开通会员才能发送私信')" class="w-full border border-pink-400 text-pink-500 rounded py-1 text-xs hover:bg-pink-50 transition">打招呼</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // 渲染需求列表
+        function renderDemands() {
+            const container = document.getElementById('demand-list-view');
+            let html = '';
+            demands.forEach(d => {
+                html += `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition">
+                    <div class="flex-1 mr-2">
+                        <div class="font-bold text-gray-800 text-sm mb-1 line-clamp-1">
+                            <span class="bg-${d.color}-100 text-${d.color}-600 text-[10px] px-1.5 py-0.5 rounded mr-1 align-middle">${d.tag}</span>
+                            ${d.title}
+                        </div>
+                        <div class="text-xs text-gray-400 flex items-center gap-2">
+                            <span><i class="far fa-clock"></i> ${d.time}</span>
+                            <span>•</span>
+                            <span>待解决</span>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <div class="text-red-500 font-bold text-sm mb-1">${d.budget}</div>
+                        <button onclick="alert('接单需提交解决方案并经过审核')" class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-sm active:scale-95 transition">接单</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // 渲染商城
+        function renderMall() {
+             const container = document.getElementById('mall-list');
+             let html = '';
+             mallItems.forEach(i => {
+                 html += `
+                 <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition border border-gray-50">
+                    <div class="h-32 overflow-hidden">
+                        <img src="${i.img}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-3">
+                        <div class="text-sm font-bold text-gray-800 truncate mb-2">${i.name}</div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-purple-600 font-bold text-sm">${i.points} <span class="text-xs text-gray-400 font-normal">积分</span></span>
+                            <button onclick="alert('积分不足，快去签到赚积分吧！')" class="bg-purple-50 hover:bg-purple-100 text-purple-600 px-2 py-1 rounded-lg text-xs font-bold transition">兑换</button>
+                        </div>
+                    </div>
+                 </div>`;
+             });
+             container.innerHTML = html;
+        }
+
+        // --- 交互逻辑 ---
+
+        function openMerchantDetail(id) {
+            const m = merchants.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('detail-name').innerText = m.name;
+            document.getElementById('detail-score').innerText = m.score;
+            document.getElementById('detail-cat').innerText = m.category;
+            document.getElementById('detail-desc').innerText = m.desc + " 本地生活通认证优质商家，提供高品质服务，欢迎到店体验。本店承诺无隐形消费，服务不满意可申请平台介入。";
+            document.getElementById('detail-addr').innerHTML = `<i class="fas fa-map-pin text-gray-400 mt-1"></i> <span>${m.addr}</span>`;
+            document.getElementById('detail-img').src = m.img;
+            
+            document.getElementById('merchant-detail-overlay').classList.remove('hidden');
+        }
+
+        function closeMerchantDetail() {
+            document.getElementById('merchant-detail-overlay').classList.add('hidden');
+        }
+
+        function showAbout() {
+            document.getElementById('about-overlay').classList.remove('hidden');
+        }
+        
+        function closeAbout() {
+            document.getElementById('about-overlay').classList.add('hidden');
+        }
+        
+        // 表单提交模拟
+        function handleDatingSubmit(e) {
+            e.preventDefault();
+            // 简单演示，实际应发送AJAX请求
+            alert('提交成功！\n\n您的资料正在进行人工审核，预计24小时内完成。\n审核通过后将展示在缘分广场。');
+            e.target.reset();
+            switchTab('dating', 'list');
+        }
+
+        function handleDemandSubmit(e) {
+            e.preventDefault();
+            alert('需求发布成功！\n\n我们将尽快为您推送给附近的优质服务商。\n您可以在“我的-需求管理”中查看进度。');
+            e.target.reset();
+            switchTab('demand', 'list');
+        }
+
+        function upgradeMember(type) {
+            const price = type === 'basic' ? 100 : 300;
+            const name = type === 'basic' ? '普通会员' : 'VIP会员';
+            if(confirm(`确认支付 ${price} 元开通【${name}】权益吗？`)) {
+                alert('支付接口模拟调用成功！\n\n感谢您成为尊贵的会员用户。');
+            }
+        }
+
+        // AI 聊天逻辑
+        function sendMsg(text) {
+            const container = document.getElementById('chat-container');
+            // 用户消息
+            container.innerHTML += `
+            <div class="flex gap-2 justify-end animate-[fadeIn_0.3s_ease-out]">
+                <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-sm max-w-[85%]">
+                    ${text}
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0"><i class="fas fa-user"></i></div>
+            </div>`;
+            
+            // 自动回复模拟
+            setTimeout(() => {
+                let reply = "抱歉，我不太理解您的问题，您可以点击下方按钮转接人工客服。";
+                if(text.includes('会员')) reply = "您可以在【我的】页面查看会员权益并进行开通。普通会员100元/年，VIP会员300元/年。VIP会员可享受首页置顶权益。";
+                if(text.includes('需求')) reply = "在【需求】页面点击顶部的“发布需求”，填写表单即可发布。发布需求完全免费，成交后我们也不收取佣金。";
+                if(text.includes('人工')) reply = "正在为您转接人工客服，请稍候...<br><span class='text-xs text-gray-400'>当前排队人数：2人，预计等待1分钟</span>";
+
+                container.innerHTML += `
+                <div class="flex gap-2 items-start animate-[fadeIn_0.3s_ease-out]">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-robot"></i></div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm max-w-[85%] text-gray-700">
+                        ${reply}
+                    </div>
+                </div>`;
+                
+                // 滚动到底部
+                container.scrollTop = container.scrollHeight;
+            }, 600);
+            
+            // 立即滚动
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleChatSend() {
+            const input = document.getElementById('chat-input');
+            const val = input.value.trim();
+            if(val) {
+                sendMsg(val);
+                input.value = '';
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMerchants();
+            renderDating();
+            renderDemands();
+            renderMall();
+        });
+
+    </script>
+</body>
+</html>
